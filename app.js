@@ -42,9 +42,13 @@ app.use(function (req, res, next) {
 
 const indexRouter = require("./routes/index");
 const authRouter = require("./routes/auth");
+const usersRouter = require("./routes/user");
+const emotionsRouter = require("./routes/emotions");
 
 app.use("/", indexRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/emotions", emotionsRouter);
 
 // 404 Middleware
 app.use((req, res, next) => {
@@ -58,7 +62,7 @@ app.use((req, res, next) => {
 // You will end up in this middleware
 // next("toto") makes you end up here
 app.use((err, req, res, next) => {
-  console.log("An error occured");
+  console.log("An error occured", err);
   res.status(err.status || 500);
   if (!res.headersSent) {
     res.json(err);
