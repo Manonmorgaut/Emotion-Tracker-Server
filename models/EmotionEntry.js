@@ -23,6 +23,8 @@ const emotionEntrySchema = new Schema({
   },
 });
 
+
+
 const EmotionEntryModel = mongoose.model("EmotionEntry", emotionEntrySchema);
 
 module.exports = EmotionEntryModel;
