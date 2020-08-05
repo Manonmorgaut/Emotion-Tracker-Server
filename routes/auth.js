@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const uploader = require("./../config/cloudinary");
 
 const salt = 10;
 
@@ -22,24 +23,30 @@ router.post("/signin", (req, res, next) => {
   });
 });
 
-router.post("/signup", (req, res, next) => {
+router.post("/signup", uploader.single("profileImg"), (req, res, next) => {
   const { email, password, firstName, lastName } = req.body;
 
-  User.findOne({ email }).then((userDocument) => {
-    if (userDocument) {
-      return res.status(400).json({ message: "Email already taken" });
-    }
+  User.findOne({ email })
+    .then((userDocument) => {
+      if (userDocument) {
+        return res.status(400).json({ message: "Email already taken" });
+      }
 
-    const hashedPassword = bcrypt.hashSync(password, salt);
-    const newUser = { email, lastName, firstName, password: hashedPassword };
-
-    User.create(newUser).then((newUserDocument) => {
-      const userObj = newUserDocument.toObject();
-      delete userObj.password;
-      req.session.currentUser = userObj;
-      res.status(201).json(userObj);
-    });
-  });
+      const hashedPassword = bcrypt.hashSync(password, salt);
+      const newUser = { email, lastName, firstName, password: hashedPassword };
+      if (req.file) {
+        newUser.profileImg = req.file.path;
+      }
+      User.create(newUser)
+        .then((newUserDocument) => {
+          const userObj = newUserDocument.toObject();
+          delete userObj.password;
+          req.session.currentUser = userObj;
+          res.status(201).json(userObj);
+        })
+        .catch((err) => res.status(500).json(err));
+    })
+    .catch((err) => res.status(500).json(err));
 });
 
 router.get("/isLoggedIn", (req, res, next) => {
