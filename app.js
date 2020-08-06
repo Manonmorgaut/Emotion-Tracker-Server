@@ -40,15 +40,22 @@ app.use(function (req, res, next) {
  * Routes
  */
 
-const indexRouter = require("./routes/index");
+// const indexRouter = require("./routes/index");
 const authRouter = require("./routes/auth");
 const usersRouter = require("./routes/user");
 const emotionsRouter = require("./routes/emotions");
 
-app.use("/", indexRouter);
+// app.use("/", indexRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/emotions", emotionsRouter);
+
+if (process.env.NODE_ENV === "production") {
+  app.use("*", (req, res, next) => {
+    // If no routes match, send them the React HTML.
+    res.sendFile(__dirname + "/public/index.html");
+  });
+};
 
 // 404 Middleware
 app.use((req, res, next) => {
